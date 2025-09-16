@@ -1,6 +1,14 @@
 import tkinter as tk
 
-BUTTON_COUNT = 19
+BUTTON_COUNT = 20
+OPERATORS = {
+            "(" : '0',
+            ")" : '0',
+            "*" : '1',
+            "/" : '1',
+            "+" : '2',
+            "-" : '2'
+        }
 
 class Engine:
     def __init__(self):    
@@ -11,27 +19,16 @@ class Engine:
         self.encoded = ""
 
         """get the string from set_result and transform it into postfix form"""
-        operators = {
-            "(" : '0',
-            ")" : '0',
-            "*" : '1',
-            "/" : '1',
-            "+" : '2',
-            "-" : '2'
-        }
+        
 
         stack = []
 
-        print(f"STRING: {string}")
-
         for char in string:
             check = False
-            for key, value in operators.items():
+            for key, value in OPERATORS.items():
                 if char == key:
                     check = True
                     break
-
-            print(f"THE STACK: {stack}")
 
             if check == False:
                 self.encoded = self.encoded + char
@@ -45,8 +42,6 @@ class Engine:
                         else:
                             while stack:
                                 operator = stack[-1]
-
-                                print(f"OPERATOR: {key} and the stack: {stack}")
 
                                 if operator != '(':
                                     self.encoded = self.encoded + operator
@@ -67,7 +62,7 @@ class Engine:
                         """case with operator on top and operator trying to get in"""
                         top = stack[-1]
 
-                        for k, v in operators.items():
+                        for k, v in OPERATORS.items():
                             if k == top:
                                 if int(value) >= int(v) and top != '(':    #value - the original string operator; v - the stacks operator
                                     operand = stack.pop()
@@ -86,7 +81,25 @@ class Engine:
         """get the postfix from encode and then transform it into calculus and get an result"""
         self.encoded = self.encode(self.result)
 
-        self.result = self.encoded
+        self.stack = []
+
+        for char in self.encoded:
+            check = False
+            print(self.stack)
+            for key, value in OPERATORS.items():
+                if char == key:
+                    check = True
+                    break
+
+            if check == True:
+                if len(self.stack) >= 2:
+                    op1 = self.stack.pop()
+                    op2 = self.stack.pop()
+                    self.stack.append(self.operation(char, int(op1), int(op2)))
+            else:
+                self.stack.append(char)
+
+        self.result = self.stack.pop()
 
 
     def get_result(self):
@@ -101,6 +114,22 @@ class Engine:
     def clear_result(self):
         self.result = "0"
 
+    def operation(self, op, operand1, operand2):
+        match op:
+            case '*' :
+                return operand2 * operand1
+
+            case '/' :
+                return operand2 / operand1
+
+            case '-' :
+                return operand2 - operand1
+            
+            case '+' :
+                return operand2 + operand1
+            
+            case _ :
+                return "UNKNOWN OPERATOR"
 
 class Application:
     def __init__(self, root_wnd):
@@ -122,7 +151,7 @@ class Application:
 
 
         #make a label with the result
-        self.result_label = tk.Label(self.root, text= str(self.engine.result))
+        self.result_label = tk.Label(self.root, text=str(self.engine.result))
         self.result_label.pack(pady=20)
 
 
@@ -169,6 +198,10 @@ class Application:
         btn = tk.Button(self.root, text='=', command=lambda: self.engine.decode())
         self.buttons[18] = btn
 
+        #make a 'info' button
+        btn = tk.Button(self.root, text='!', command=lambda: self.show_info())
+        self.buttons[19] = btn
+
         #create the 'numbers' buttons
         for index in range(1,10):
             # self.buttons[index] = tk.Button(self.root, text=index, command=lambda i=index: self.handle_number_click(i)).pack()
@@ -183,7 +216,7 @@ class Application:
         self.buttons[0].grid(row=1, column=0)   # 0
         self.buttons[10].grid(row=1, column=1)  # (
         self.buttons[11].grid(row=1, column=2)  # )
-        
+        self.buttons[19].grid(row=1, column=3)  # !
         self.buttons[12].grid(row=1, column=4)  # C
 
 
@@ -211,15 +244,24 @@ class Application:
         self.show_result()
 
 
-    def handle_number_click(self):
-        self.engine.set_result(5)
-        self.result_label.config(text=str(self.engine.get_result()))
-
     def show_result(self):
         self.result_label.config(text=self.engine.get_result())
         self.root.after(10, self.show_result)
 
+    def show_info(self):
+        """make a new window and a label inside"""
+        self.info_wnd = tk.Tk()
 
+        self.info_wnd.title("Info")
+
+        self.info_wnd_geometry = self.info_wnd.geometry("200x200")
+
+        self.info_frame = tk.Frame(self.info_wnd)
+        self.info_frame.pack(expand=True)
+
+        self.info_label = tk.Label(self.info_frame, text="THIS IS THE INFO!\ntesttestestestest\ntestesteststestestestetstesest\ntestsetestestsetse").pack()
+
+        self.info_wnd.mainloop()
 
 def main():
     #make the main window
