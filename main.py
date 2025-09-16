@@ -7,10 +7,87 @@ class Engine:
         self.result = "0"
 
     def encode(self, string):
-        """get the string from set_result and transform it into postfix form"""
 
-    def decode():
+        self.encoded = ""
+
+        """get the string from set_result and transform it into postfix form"""
+        operators = {
+            "(" : '0',
+            ")" : '0',
+            "*" : '1',
+            "/" : '1',
+            "+" : '2',
+            "-" : '2'
+        }
+
+        stack = []
+
+        print(f"STRING: {string}")
+
+        for char in string:
+            check = False
+            for key, value in operators.items():
+                if char == key:
+                    check = True
+                    break
+
+            print(f"THE STACK: {stack}")
+
+            if check == False:
+                self.encoded = self.encoded + char
+            else:
+                """this is operator"""
+                if int(value) == 0:
+                    # print(f"KEY:{char}")
+                    if key == ')':
+                        if len(stack) == 0:
+                            return "Error!"
+                        else:
+                            while stack:
+                                operator = stack[-1]
+
+                                print(f"OPERATOR: {key} and the stack: {stack}")
+
+                                if operator != '(':
+                                    self.encoded = self.encoded + operator
+                                    stack.pop()
+                                else:
+                                    stack.pop()
+                                    break
+                            
+                    else:
+                        stack.append(char)
+                        
+
+                else:
+                    if len(stack) == 0:
+                        stack.append(char)
+                        
+                    else:
+                        """case with operator on top and operator trying to get in"""
+                        top = stack[-1]
+
+                        for k, v in operators.items():
+                            if k == top:
+                                if int(value) >= int(v) and top != '(':    #value - the original string operator; v - the stacks operator
+                                    operand = stack.pop()
+                                    self.encoded = self.encoded + operand
+                                    stack.append(char)
+                                else:
+                                    stack.append(char)
+
+        while len(stack) != 0:
+            self.encoded = self.encoded + stack.pop()
+
+        return self.encoded
+
+
+    def decode(self):
         """get the postfix from encode and then transform it into calculus and get an result"""
+        self.encoded = self.encode(self.result)
+
+        self.result = self.encoded
+
 
     def get_result(self):
         return self.result
@@ -53,7 +130,7 @@ class Application:
         self.buttons = [None] * BUTTON_COUNT
 
         #definition of the 0 button
-        btn = tk.Button(self.root, text='0', command= lambda: self.engine.set_result(str(0)))
+        btn = tk.Button(self.root, text='0', command= lambda: self.engine.set_result('0'))
         self.buttons[0] = btn
 
         #definition of the '(' button
@@ -89,7 +166,7 @@ class Application:
         self.buttons[17] = btn
 
         #make a 'result' button
-        btn = tk.Button(self.root, text='=', command=self.show_result)
+        btn = tk.Button(self.root, text='=', command=lambda: self.engine.decode())
         self.buttons[18] = btn
 
         #create the 'numbers' buttons
