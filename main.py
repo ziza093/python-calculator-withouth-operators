@@ -1,4 +1,5 @@
 import tkinter as tk
+import re as re
 
 BUTTON_COUNT = 20
 OPERATORS = {
@@ -23,7 +24,10 @@ class Engine:
 
         stack = []
 
-        for char in string:
+        expression = re.findall(r'\d+|[+*/()-]', string)
+
+
+        for char in expression:
             check = False
             for key, value in OPERATORS.items():
                 if char == key:
@@ -31,11 +35,10 @@ class Engine:
                     break
 
             if check == False:
-                self.encoded = self.encoded + char
+                self.encoded = self.encoded + ' ' + char
             else:
                 """this is operator"""
                 if int(value) == 0:
-                    # print(f"KEY:{char}")
                     if key == ')':
                         if len(stack) == 0:
                             return "Error!"
@@ -44,7 +47,7 @@ class Engine:
                                 operator = stack[-1]
 
                                 if operator != '(':
-                                    self.encoded = self.encoded + operator
+                                    self.encoded = self.encoded + ' ' + operator
                                     stack.pop()
                                 else:
                                     stack.pop()
@@ -66,13 +69,13 @@ class Engine:
                             if k == top:
                                 if int(value) >= int(v) and top != '(':    #value - the original string operator; v - the stacks operator
                                     operand = stack.pop()
-                                    self.encoded = self.encoded + operand
+                                    self.encoded = self.encoded + ' ' + operand
                                     stack.append(char)
                                 else:
                                     stack.append(char)
 
         while len(stack) != 0:
-            self.encoded = self.encoded + stack.pop()
+            self.encoded = self.encoded + ' ' + stack.pop()
 
         return self.encoded
 
@@ -81,11 +84,12 @@ class Engine:
         """get the postfix from encode and then transform it into calculus and get an result"""
         self.encoded = self.encode(self.result)
 
+        self.encoded = self.encoded.split(' ')
+
         self.stack = []
 
         for char in self.encoded:
             check = False
-            print(self.stack)
             for key, value in OPERATORS.items():
                 if char == key:
                     check = True
@@ -129,7 +133,23 @@ class Engine:
                 return operand2 + operand1
             
             case _ :
-                return "UNKNOWN OPERATOR"
+                return "?"
+
+
+    # def sum(self, op1, op2):
+    #     op1_bin = bin(op1)
+    #     op2_bin = bin(op2)
+        
+    #     if op1 > op2:
+    #         aux = op1
+    #         op1 = op2
+    #         op2 = op1
+
+    #         for bit in op2_bin:
+    #             print(bit)
+
+
+
 
 class Application:
     def __init__(self, root_wnd):
@@ -244,9 +264,11 @@ class Application:
         self.show_result()
 
 
+
     def show_result(self):
         self.result_label.config(text=self.engine.get_result())
         self.root.after(10, self.show_result)
+
 
     def show_info(self):
         """make a new window and a label inside"""
