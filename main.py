@@ -130,24 +130,19 @@ class Engine:
                 return operand2 - operand1
             
             case '+' :
-                return operand2 + operand1
+                return self.sum(operand1, operand2)
             
             case _ :
                 return "?"
 
 
-    # def sum(self, op1, op2):
-    #     op1_bin = bin(op1)
-    #     op2_bin = bin(op2)
-        
-    #     if op1 > op2:
-    #         aux = op1
-    #         op1 = op2
-    #         op2 = op1
+    def sum(self, op1, op2):        
+        while op2 != 0:
+            carry = op1 & op2
+            op1 = op1 ^ op2
+            op2 = carry << 1
 
-    #         for bit in op2_bin:
-    #             print(bit)
-
+        return op1
 
 
 
